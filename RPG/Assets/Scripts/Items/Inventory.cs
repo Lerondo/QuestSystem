@@ -1,141 +1,119 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using UnityEngine.Events;
 
 public class Inventory : MonoBehaviour {
 
-	private int _gold;
-	private int _invAmount;
+	private int _gold = 0;
 	[SerializeField] private Text _goldText;
-	[SerializeField] private Text _itemStatsText;
-	[SerializeField] private GameObject _itemStatsPanel;
 	[SerializeField] private GameObject _inventoryPanel;
-	[SerializeField] private Sprite _defaultsprite;
-	private Button[] allButtons = new Button[42];
-	public Button[] characterButtons = new Button[13];
-	public string[] characterSlotNames = new string[13];
-	private int buttonCounter;
-	private int _characterCounter;
+	[SerializeField] private List<Transform> _itemParentObjects = new List<Transform>();
+	public GameObject itemButtonPrefab;
+	public Text itemStatsText;
+
+	private PlayerStats _playerStats;
 
 	void Start()
 	{
-		_itemStatsPanel.SetActive(false);
+		_playerStats = GetComponent<PlayerStats>();
 		_goldText.text = "Gold : " + _gold.ToString();
-		GameObject[] allItemSlots = new GameObject[42];
-		for (int i = 0; i <allItemSlots.Length; i++)
-		{
-			buttonCounter ++;
-			allItemSlots[i] = GameObject.Find("Slot" + buttonCounter);
-		}
-		for (int i = 0; i < allItemSlots.Length; i++)
-		{
-			allButtons[i] = allItemSlots[i].GetComponent<Button>();
-			if (i < 1)
-				AddItem(ItemDatabase.itemList[Random.Range(0,ItemDatabase.itemList.Count)]);
-		}
-		for (int i = 0; i < characterSlotNames.Length; i ++)
-		{
-			characterButtons[_characterCounter].name = characterSlotNames[_characterCounter];
-			_characterCounter ++;
-		}
-		ToggleInventory();
+		_inventoryPanel.SetActive(false);
 	}
 	void Update()
 	{
 		if (Input.GetKeyDown(KeyCode.I))
 			ToggleInventory();
-		if (_itemStatsPanel.activeInHierarchy == true)
-		    _itemStatsPanel.transform.position = Input.mousePosition;
+		if (Input.GetKeyDown(KeyCode.N))
+			AddItem(ItemDatabase.itemList[Random.Range(0, ItemDatabase.itemList.Count - 1)]);
+		
+		if (Input.GetKeyDown(KeyCode.B))
+			ChangeGold(100);
 	}
 	void ToggleInventory()
 	{
 		if (_inventoryPanel.activeInHierarchy == true)
 		{
 			_inventoryPanel.SetActive(false);
-			CloseStats();
+			PreventAttacking();
 			GameObject.FindWithTag(Tags.Player).GetComponent<MouseLook>().enabled = true;
+			GameObject.FindWithTag(Tags.MainCam).GetComponent<MouseLook>().enabled = true;
 		}
 		else
 		{
 			_inventoryPanel.SetActive(true);
+			PreventAttacking();
 			GameObject.FindWithTag(Tags.Player).GetComponent<MouseLook>().enabled = false;
+			GameObject.FindWithTag(Tags.MainCam).GetComponent<MouseLook>().enabled = false;
 		}
-	}
-	public void RemoveItem(Item item)
+	}	
+	private void PreventAttacking()
 	{
-		AddItem(item);
-		GetSlotName(item).GetComponent<Image>().sprite = _defaultsprite;
-		GetSlotName(item).GetComponentInChildren<Text>().text = GetSlotName(item).name;
-		GetSlotName(item).GetComponent<EventTrigger>().enabled = false;
-		GetSlotName(item).GetComponent<Button>().onClick.RemoveAllListeners();
-		CloseStats();
-		UpdatePlayerStats(item, true);
+		GameObject.Find("RightHand").GetComponent<PlayerCombat>().InMenu();
 	}
-	public void WearItem(Item item, Sprite itemSprite, int slot)
+	public void AddItem(Item newItem)
 	{
-		if (GetSlotName(item).GetComponent<Image>().sprite == _defaultsprite 
-		    && item.getItemLevel <= GetComponent<PlayerStats>().getPlayerLevel)
+		Item item;
+		item = newItem;
+		GameObject button = (GameObject)Instantiate (itemButtonPrefab);
+		int i = 0;
+		//item.itemSort = Item.ItemSort.Weapons; // DELETE LATER
+		if (item.itemSort == Item.ItemSort.Weapons)
+			i = 0;
+		else if (item.itemSort == Item.ItemSort.Armor)
+			i = 1;
+		else if (item.itemSort == Item.ItemSort.Aid)
+			i = 2;
+		else if (item.itemSort == Item.ItemSort.Misc)
+			i = 3;
+		else if (item.itemSort == Item.ItemSort.QuestItem)
+			i = 4;
+
+		button.name = "item" + item.getItemName;
+		button.GetComponentInChildren<Text>().text = item.getItemName;
+		if (item.getItemSort != Item.ItemSort.QuestItem)
 		{
-			_invAmount -= 1;
-			allButtons[slot].GetComponent<Image>().sprite = _defaultsprite;
-			allButtons[slot].GetComponent<EventTrigger>().enabled = false;
-			allButtons[slot].GetComponent<Button>().onClick.RemoveAllListeners();
-			GetSlotName(item).GetComponent<Image>().sprite = itemSprite;
-			GetSlotName(item).GetComponentInChildren<Text>().text = "";
-			GetSlotName(item).GetComponent<EventTrigger>().enabled = true;
-			GetSlotName(item).GetComponent<Button>().onClick.AddListener(
-				() =>
-				{
-					GetSlotName(item).GetComponent<Button>().onClick.RemoveAllListeners();
-					RemoveItem(item);
-				}
-			);
-			AddEventsToButton(0, item, false);
+			button.GetComponent<Button>().onClick.AddListener
+			(() =>{
+				EquipItem (item, button);
+			});
+		}
+		AddEventsToButton(button, item);
+		button.transform.SetParent(_itemParentObjects[i]);
+	}
+	public void EquipItem(Item item, GameObject button)
+	{
+		if (item.getItemEquipAble && item.getItemLevel <= _playerStats.getPlayerLevel && !_playerStats.equipedList.Contains(item.getItemClass.ToString()))
+		{
+			_playerStats.equipedList.Add(item.getItemClass.ToString());
+			button.GetComponentInChildren<Text>().text = "Equiped : " + item.getItemName;
+			button.GetComponentInChildren<Text>().color = Color.gray;
+			item.getItemEquiped = true;
 			UpdatePlayerStats(item, false);
-			CloseStats();
+			button.GetComponent<Button>().onClick.RemoveAllListeners();
+			button.GetComponent<Button>().onClick.AddListener(
+			() =>{
+				UnEquipItem (item, button);
+			});
 		}
 	}
-	private GameObject GetSlotName(Item item)
+	public void UnEquipItem(Item item, GameObject button)
 	{
-		return GameObject.Find(item.getItemClass.ToString());
+		_playerStats.equipedList.Remove(item.getItemClass.ToString());
+		button.GetComponentInChildren<Text>().text = item.getItemName;
+		button.GetComponentInChildren<Text>().color = Color.black;
+		item.getItemEquiped = false;
+		UpdatePlayerStats(item, true);
+		button.GetComponent<Button>().onClick.RemoveAllListeners();
+		button.GetComponent<Button>().onClick.AddListener(
+			() =>{
+			EquipItem (item, button);
+		});
 	}
-
-	public void AddItem(Item item)
-	{
-		int slot = 0;
-		for (int i = 0; i < _invAmount; i++)
-		{
-			if(allButtons[slot].GetComponent<Image>().sprite != _defaultsprite)
-				slot ++;
-		}
-		Sprite itemSprite = Resources.Load(item.itemSprite, typeof(Sprite)) as Sprite;
-		allButtons[slot].GetComponent<Image>().sprite = itemSprite;
-		allButtons[slot].GetComponent<Button>().onClick.AddListener(
-			() =>
-			{
-				WearItem (item, itemSprite, slot);
-			}
-		);
-		AddEventsToButton(slot, item, true);
-		_invAmount += 1;
-	}
-
-	/*
-	 * Damage 15
-	 * 0.75 Attack Speed
-	 * DMG * ATTACK SPEED = DPS
-	 * 15 * 0.75 = 11.25
-	 * 
-	 * Damage 22
-	 * 1.20 attack Speed
-	 * 22 * 1.20 = 26.4
-	 * 
-	*/
-	public void ShowStats(int buttonSlot, Item item)
+	public void ShowStats(Item item)
  	{
-		_itemStatsPanel.SetActive(true);
 		string stats = "";
 		stats += item.itemClass + "\n";
 		stats += item.getItemName + "\n";
@@ -146,11 +124,8 @@ public class Inventory : MonoBehaviour {
 				stats += item.getItemPhysicalDamage + " Physical Damage" + "\n";
 			if (!CheckIfZero(item.getItemMagicalDamage))
 				stats += item.getItemMagicalDamage + " Magical Damage" + "\n";
-			if (!CheckIfZero(item.getItemElementalDamage))
-				stats += item.getItemElementalDamage + " " + item.getItemElement + " Damage" + "\n";
 			stats += (item.getItemAttackSpeed + 1 ) + " Attack Speed" + "\n";
 			stats += ((item.getItemAttackSpeed + 1 ) * item.getItemPhysicalDamage).ToString() + " DPS" + "\n";
-			stats += item.getItemCritChance + " Crit Chance" + "\n";
 		}else
 		{
 			if (!CheckIfZero(item.getItemPhysicalDefense))
@@ -159,51 +134,34 @@ public class Inventory : MonoBehaviour {
 				stats += item.getItemMagicalDefense + " Magical Defense" + "\n";
 		}
 		stats += "Sell Value : " + item.getItemSellValue;
-		_itemStatsText.text = stats;
+		itemStatsText.text = stats;
 	}
 	public bool CheckIfZero(int currentStat)
 	{
 		if(currentStat > 0)
-		{
 			return false;
-		}
-		return true;
+		return true;	
 	}
-	public void CloseStats()
-	{
-		_itemStatsText.text = "";
-		_itemStatsPanel.SetActive(false);
-	}
-
-	private void AddEventsToButton(int slot, Item item, bool toWear)
+	private void AddEventsToButton(GameObject button, Item item)
 	{
 		//Add OnPointerEnter Event
 		EventTrigger.TriggerEvent trigger = new EventTrigger.TriggerEvent();
 		EventTrigger.Entry entry = new EventTrigger.Entry();
 		
-		trigger.AddListener((eventData) => ShowStats(slot, item));
+		trigger.AddListener((eventData) => ShowStats(item));
 		entry.eventID = EventTriggerType.PointerEnter;
 		entry.callback = trigger;
-		
+
+		button.GetComponent<EventTrigger>().triggers.Add(entry);
+		/*
 		//Add OnPointerExit Event
 		EventTrigger.TriggerEvent trigger2 = new EventTrigger.TriggerEvent();
 		EventTrigger.Entry entry2 = new EventTrigger.Entry();
 		
-		trigger2.AddListener((eventData) => CloseStats());
+		//trigger2.AddListener((eventData) => CloseStats());
 		entry2.eventID = EventTriggerType.PointerExit;
 		entry2.callback = trigger2;
-
-		if (toWear == true)
-		{
-			allButtons[slot].GetComponent<EventTrigger>().enabled = true;
-			allButtons[slot].GetComponent<EventTrigger>().triggers.Add(entry);
-			allButtons[slot].GetComponent<EventTrigger>().triggers.Add(entry2);
-		}
-		else
-		{
-			GetSlotName(item).GetComponent<EventTrigger>().triggers.Add(entry);
-			GetSlotName(item).GetComponent<EventTrigger>().triggers.Add(entry2);
-		}
+		*/
 	}
 
 	public void ChangeGold (int amount)
@@ -213,32 +171,27 @@ public class Inventory : MonoBehaviour {
 	}
 	private void UpdatePlayerStats(Item item, bool subract)
 	{
-		PlayerStats playerStats = GetComponent<PlayerStats>();
 		if (subract == false)
 		{
-			playerStats.getCritChance += item.getItemCritChance;
-			playerStats.getAttackSpeed += item.getItemAttackSpeed;
-			playerStats.getPhysicalDamage += item.getItemPhysicalDamage;
-			playerStats.getMagicalDamage += item.getItemMagicalDamage;
-			playerStats.getElementalDamage += item.getItemElementalDamage;
-			playerStats.getPhysicalDefense += item.getItemPhysicalDefense;
-			playerStats.getMagicalDefense += item.getItemMagicalDefense;
-			if (playerStats.getElement == "Normal")
-				playerStats.getElement = item.getItemElement.ToString();
+			_playerStats.getAttackSpeed += item.getItemAttackSpeed;
+			_playerStats.getPhysicalDamage += item.getItemPhysicalDamage;
+			_playerStats.getMagicalDamage += item.getItemMagicalDamage;
+			_playerStats.getPhysicalDefense += item.getItemPhysicalDefense;
+			_playerStats.getMagicalDefense += item.getItemMagicalDefense;
+			if (_playerStats.getElement == "Normal")
+				_playerStats.getElement = item.getItemElement.ToString();
 		}
 		else
 		{
-			playerStats.getCritChance -= item.getItemCritChance;
-			playerStats.getAttackSpeed -= item.getItemAttackSpeed;
-			playerStats.getPhysicalDamage -= item.getItemPhysicalDamage;
-			playerStats.getMagicalDamage -= item.getItemMagicalDamage;
-			playerStats.getElementalDamage -= item.getItemElementalDamage;
-			playerStats.getPhysicalDefense -= item.getItemPhysicalDefense;
-			playerStats.getMagicalDefense -= item.getItemMagicalDefense;
-			if (playerStats.getElement == item.getItemElement.ToString())
-				playerStats.getElement = "Normal";
+			_playerStats.getAttackSpeed -= item.getItemAttackSpeed;
+			_playerStats.getPhysicalDamage -= item.getItemPhysicalDamage;
+			_playerStats.getMagicalDamage -= item.getItemMagicalDamage;
+			_playerStats.getPhysicalDefense -= item.getItemPhysicalDefense;
+			_playerStats.getMagicalDefense -= item.getItemMagicalDefense;
+			if (_playerStats.getElement == item.getItemElement.ToString())
+				_playerStats.getElement = "Normal";
 		}
-		playerStats.UpdateStats();
+		_playerStats.UpdateStats(true);
 	}
 	public int getGold
 	{

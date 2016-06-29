@@ -5,6 +5,7 @@ public class Steel_Helm : Item {
 	
 	public Steel_Helm()
 	{
+		itemSort = ItemSort.Armor;
 		itemClass = ItemClass.Helm;
 		_itemName = "Steel Helm";
 		_itemLevel = 3;

@@ -2,7 +2,7 @@
 using System.Collections;
 
 public class PlayerMovement : MonoBehaviour {
-	private float _moveSpeed = 3.5f;
+	private float _moveSpeed = 5f;
 	private GameObject _player;
 	private bool _onGround = false;
 
@@ -19,7 +19,7 @@ public class PlayerMovement : MonoBehaviour {
 			if (Input.GetAxis("Horizontal") != 0 || Input.GetAxis("Vertical") != 0)
 				MovePlayer ();
 
-		if (Input.GetKeyDown (KeyCode.Space))
+		if (_onGround && Input.GetKeyDown (KeyCode.Space))
 			Jump ();
 	}	
 	void MovePlayer()
@@ -29,16 +29,13 @@ public class PlayerMovement : MonoBehaviour {
 		_player.transform.Translate (x, 0, z, Space.Self);
 
 		if (Input.GetKey (KeyCode.LeftShift))
-			_moveSpeed = 35f;
+			_moveSpeed = 8f;
 		else
-			_moveSpeed = 3.5f;
+			_moveSpeed = 5f;
 	}
 	void Jump()
 	{
-		if (_onGround)
-		{
-			_rigidBody.AddForce(0,275,0);
-		}
+		_rigidBody.AddForce(0,275,0);
 	}
 	void OnCollisionEnter (Collision other)
 	{

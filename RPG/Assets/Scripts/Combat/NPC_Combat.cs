@@ -120,7 +120,7 @@ public class NPC_Combat : MonoBehaviour {
 	{
 		if (_newAttackTime <= Time.time)
 		{
-			if (target.GetComponent<Health>().getHealth() < _damage)
+			if (target.GetComponent<Health>().getHealth < _damage)
 				myTarget = null;
 			target.GetComponent<Health>().TakeDamage(_damage);
 			_newAttackTime = Time.time + _attackCooldown;

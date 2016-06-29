@@ -25,10 +25,6 @@ public class QuestJournal : MonoBehaviour {
 
 	private int _selectedQuest = -1;
 
-	void Start()
-	{
-		ToggleJournal();
-	}
 	void Update()
 	{
 		if (Input.GetKeyDown(KeyCode.J))
@@ -71,11 +67,11 @@ public class QuestJournal : MonoBehaviour {
 			SelectQuest (name ,diff, id, objective, thoughts, rewards);
 		}
 		);
-		button.transform.parent = questsPanel;
+		button.transform.SetParent(questsPanel);
 		GameObject image = (GameObject)Instantiate (questMapMarkerImagePrefab);
 		image.name = "Quest" + id + "Marker";
 		_questMarkers.Add(image);
-		image.transform.parent = mapPanel;
+		image.transform.SetParent(mapPanel);
 		mapLoc.y = mapLoc.z;
 		image.transform.localPosition = mapLoc;
 		image.transform.localScale = new Vector3(1,1,1);

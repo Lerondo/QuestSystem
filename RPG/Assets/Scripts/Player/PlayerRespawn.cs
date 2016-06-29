@@ -12,8 +12,8 @@ public class PlayerRespawn : MonoBehaviour {
 		enemies = GameObject.FindGameObjectsWithTag(Tags.Enemy);
 		foreach (GameObject enemy in enemies)
 		{
-			if (enemy.GetComponent<NPC_Combat>().myTarget = GameObject.FindWithTag(Tags.Player))
-				enemy.GetComponent<NPC_Combat>().myTarget = null;
+			if (enemy.GetComponent<Enemy_Behaviour>().myTarget = GameObject.FindWithTag(Tags.Player))
+				enemy.GetComponent<Enemy_Behaviour>().myTarget = null;
 		}
 	}
 	private void ActivateSpawnPoint()

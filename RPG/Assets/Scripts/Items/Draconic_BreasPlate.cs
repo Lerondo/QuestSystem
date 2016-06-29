@@ -5,6 +5,7 @@ public class Draconic_BreasPlate : Item {
 
 	public Draconic_BreasPlate()
 	{
+		itemSort = ItemSort.Armor;
 		itemClass = ItemClass.BreastPlate;
 		_itemName = "Draconic BreastPlate";
 		_itemLevel = 1;

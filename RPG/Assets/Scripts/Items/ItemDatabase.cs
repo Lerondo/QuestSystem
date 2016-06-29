@@ -18,6 +18,10 @@ public class ItemDatabase : MonoBehaviour {
 		for(int i = 0; i < itemList.Count; i++)
 		{
 			itemList[i].itemID = i;
+			if (itemList[i].itemSort == Item.ItemSort.Weapons || itemList[i].itemSort == Item.ItemSort.Armor)
+				itemList[i].getItemEquipAble = true;
+			else
+				itemList[i].getItemEquipAble = false;
 		}
 	}
 	public static List<Item> GetItemsViaId(List<int> itemIds)

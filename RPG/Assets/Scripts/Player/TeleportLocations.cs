@@ -9,16 +9,7 @@ public class TeleportLocations : MonoBehaviour{
 	
 	[SerializeField] private GameObject mapPanel;
 	[SerializeField] private GameObject tpButtonPrefab;
-
-	void Start()
-	{
-		ToggleMap();
-	}
-	void Update()
-	{
-		if (Input.GetKeyDown(KeyCode.M))
-			ToggleMap();
-	}
+	
 	public void AddTeleportPoint(Vector3 locationPos)
 	{
 		teleportPositions.Add(locationPos);

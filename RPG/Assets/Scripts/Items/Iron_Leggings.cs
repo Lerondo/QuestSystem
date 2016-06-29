@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections;
 
-class Iron_Leggings : Item
+public class Iron_Leggings : Item
 {
 	public Iron_Leggings()
 	{

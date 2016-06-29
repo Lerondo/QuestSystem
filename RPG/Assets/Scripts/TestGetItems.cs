@@ -4,6 +4,7 @@ using System.Collections.Generic;
 
 public class TestGetItems : MonoBehaviour {
 
+	public List<Item> itemlist = new List<Item>();
 	public List<UnityEditor.MonoScript> items = new List<UnityEditor.MonoScript>();
 
 	void Start ()
@@ -11,12 +12,12 @@ public class TestGetItems : MonoBehaviour {
 		foreach(UnityEditor.MonoScript obj in Resources.LoadAll("Items/", typeof(UnityEditor.MonoScript)))
 		{
 			items.Add(obj);
-			Debug.Log(obj.name + " = " + obj.GetClass());
+			Debug.Log(obj.name + " = " + obj.GetType());
 		}
 	}
 	void Update()
 	{
 		//if (Input.GetKeyDown(KeyCode.X))
-			//GetComponent<Inventory>().AddItem(items[1]);
+			//itemlist.Add(items[0]);
 	}
 }

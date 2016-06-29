@@ -11,7 +11,7 @@ public class ShopKeeper : MonoBehaviour {
 	void Start()
 	{
 		welcomeText.text = "Welcome to my Shop Traveler!" + "\n" + "-Press 'P' To open Shop";
-		welcomeText.enabled = false;
+		welcomeText.gameObject.SetActive(false);
 		_shop = GameObject.FindWithTag(Tags.GameController).GetComponent<Shop>();
 	}
 	void Update()
@@ -23,7 +23,7 @@ public class ShopKeeper : MonoBehaviour {
 	{
 		if (other.gameObject.tag == Tags.Player)
 		{
-			welcomeText.enabled = true;
+			welcomeText.gameObject.SetActive(true);
 			_canOpenShop = true;
 		}
 	}
@@ -33,7 +33,7 @@ public class ShopKeeper : MonoBehaviour {
 		{
 			if (GameObject.Find("ShopPanel"))
 				_shop.ToggleShopInterface();
-			welcomeText.enabled = false;
+			welcomeText.gameObject.SetActive(false);
 			_canOpenShop = false;
 		}
 	}

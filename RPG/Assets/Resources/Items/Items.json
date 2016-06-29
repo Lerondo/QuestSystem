@@ -1,0 +1,32 @@
+{
+    "Weapons":
+    [
+        {
+            "id": 0,
+            "name":"Thunder Fury",
+            "itemclass":"Weapon",
+            "damage":15
+        },
+        {
+            "id": 1,
+            "name":"Super Sledge",
+            "itemclass":"Weapon",
+            "damage":45
+        }
+    ],
+    "Hats":
+    [
+        {
+            "id": 0,
+            "name":"Large Fedora",
+            "special":true,
+            "slug": "large_fedora"
+        },
+        {
+            "id": 1,
+            "name":"Stetson",
+            "special":false,
+            "slug": "black_stetson"
+        }
+    ]
+}

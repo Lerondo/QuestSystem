@@ -6,6 +6,7 @@ public class Wooden_Axe : Item {
 
 	public Wooden_Axe()
 	{
+		itemSort = ItemSort.Weapons;
 		itemClass = ItemClass.Weapon;
 		_itemName = "Wooden Axe";
 		_itemLevel = 1;
@@ -15,6 +16,5 @@ public class Wooden_Axe : Item {
 		_itemBuyValue = 25;
 		_itemSellValue = Mathf.RoundToInt(_itemBuyValue / 4);
 		_itemSprite = "Sprites/Items/Axe1";
-		_twoHanded = false;
 	}
 }

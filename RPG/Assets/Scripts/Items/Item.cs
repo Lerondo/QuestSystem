@@ -5,6 +5,14 @@ using System.Collections.Generic;
 [System.Serializable]
 public class Item : System.Object {
 
+	public enum ItemSort
+	{
+		Weapons,
+		Armor,
+		Aid,
+		Misc,
+		QuestItem
+	}
 	public enum ItemClass
 	{
 		Weapon,
@@ -36,26 +44,31 @@ public class Item : System.Object {
 	}
 	
 	public int itemID;
+	public ItemSort itemSort;
 	public ItemClass itemClass;
 	public ItemElement itemElement;
+	protected bool _equiped;
+	protected bool _equipAble;
 	protected string _itemName;
 	protected int _itemLevel;
 	protected bool _ranged;
-	protected bool _twoHanded;
 
 	protected float _attackSpeed;
 	protected int _itemBuyValue;
 	protected int _itemSellValue;
-	protected int _critChance;
 	protected int _itemPhysicalDamage;
 	protected int _itemMagicalDamage;
-	protected int _itemElementalDamage;
 
 	protected int _itemPhysicalDefense;
 	protected int _itemMagicalDefense;
 		
 	protected string _itemSprite;
-	
+
+	public ItemSort getItemSort
+	{
+		get { return itemSort; }
+		set { itemSort = value; }
+	}
 	public ItemClass getItemClass
 	{
 		get { return itemClass; }
@@ -65,6 +78,16 @@ public class Item : System.Object {
 	{
 		get { return itemElement; }
 		set { itemElement = value; }
+	}
+	public bool getItemEquiped
+	{
+		get { return _equiped; }
+		set { _equiped = value; }
+	}
+	public bool getItemEquipAble
+	{
+		get { return _equipAble; }
+		set { _equipAble = value; }
 	}
 	public string getItemName
 	{
@@ -91,11 +114,6 @@ public class Item : System.Object {
 		get { return _itemSellValue; }
 		set { _itemSellValue = value; }
 	}
-	public int getItemCritChance
-	{
-		get { return _critChance; }
-		set { _critChance = value; }
-	}
 	public int getItemPhysicalDamage
 	{
 		get { return _itemPhysicalDamage; }
@@ -105,11 +123,6 @@ public class Item : System.Object {
 	{
 		get { return _itemMagicalDamage; }
 		set { _itemMagicalDamage = value; }
-	}
-	public int getItemElementalDamage
-	{
-		get { return _itemElementalDamage; }
-		set { _itemElementalDamage = value; }
 	}
 	public int getItemPhysicalDefense
 	{
